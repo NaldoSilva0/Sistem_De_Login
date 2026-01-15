@@ -1,12 +1,14 @@
-# Sistema de Cadastro e Login em Python
+# Sistema de Cadastro e Login com Menu Pós-Login em Python
 
-Este projeto é um **sistema simples de gerenciamento de usuários** feito em Python, utilizando **JSON** para armazenamento de dados. Ele permite que o usuário:
+Este projeto é um **sistema completo de gerenciamento de usuários** feito em Python, utilizando **JSON** para armazenamento e **arquivo de log** para registrar atividades. O sistema permite:
 
-- Crie contas com validação de duplicidade
-- Faça login
-- Altere sua senha
-- Exclua sua conta
-- Navegue em um menu pós-login personalizado
+- Registro de usuários com validação
+- Login seguro
+- Menu pós-login com opções avançadas
+- Alteração de senha
+- Consulta de informações da conta
+- Exclusão de conta
+- Registro de logs de login e logout
 
 ---
 
@@ -14,19 +16,21 @@ Este projeto é um **sistema simples de gerenciamento de usuários** feito em Py
 
 ### Menu Principal
 1. **Registrar conta**: cria um novo usuário com senha.
-2. **Logar conta**: acessa o menu interno do usuário após autenticação.
+2. **Logar conta**: autentica o usuário e abre o menu pós-login.
 3. **Sair**: encerra o programa.
 
 ### Menu Pós-Login
-1. **Alterar senha**: permite ao usuário atualizar sua senha.
-2. **Excluir conta**: remove a conta do usuário após confirmação de senha.
-3. **Sair do menu**: retorna ao menu principal.
+1. **Alterar senha**: permite ao usuário atualizar sua senha atual.
+2. **Informações da conta**: exibe o último registro no log da conta.
+3. **Deletar conta**: remove a conta do usuário após confirmação de senha.
+4. **Logout**: encerra a sessão do usuário e registra no log.
 
 ---
 
-## Estrutura dos Dados
+## Estrutura dos Arquivos
 
-Os usuários são armazenados em um arquivo `dados.json` como uma lista de dicionários:
+### `dados.json`
+Armazena os usuários em formato JSON:
 
 ```json
 [
