@@ -29,31 +29,41 @@ def contaExiste(nome, usuarios):
             return True
     return False
 
-def registrar_dados():
-    usuarios = carregar_dados()
-
+def repetir_senha():
     while True:
-        usuario = input('Digite o usuario: ').lower()
-        if contaExiste(usuario, usuarios):
-            print('Esse usuário ja existe, Tente novamente!!')
-            continue
-
         senha = input('Digite a senha: ')
         repSenha = input('Repita a senha: ')
 
         if senha != repSenha:
             print('As senha não são iguais, tente novamente')
             continue
+        return senha
 
+def pedir_usuario(usuarios):
+    while True:
+        usuario = input('Digite o usuario: ')
+        if contaExiste(usuario, usuarios):
+            print('Esse usuário ja existe, Tente novamente!!')
+            continue
+        return usuario
+
+def salvar_conta(usuarios, usuario, senha):
         usuarios.append({
             'usuario': usuario, 
             'senha': senha
             })
-        
+            
         salvar_dados(usuarios)
         print('Registro concluído!!')
-        break
-    menu()
+        pausar()
+
+
+def registrar_dados(usuarios):
+    
+    while True:
+        usuario = pedir_usuario(usuarios)
+        senha = repetir_senha()
+        salvar_conta(usuarios, usuario, senha)
 
 def informações_conta():
     with open('LogEntrada.txt', 'r', encoding='utf-8') as log:
@@ -63,54 +73,60 @@ def informações_conta():
             ultima_leia = leia[-1].strip()
             print('---INFORMAÇÕES DA CONTA---')
             print(ultima_leia)
-            input('Aperte ENTER para voltar ao menu')
+            pausar()
 
-def mudar_senha():
-    usuarios = carregar_dados()
-    contador = 5
-    
-    print('\n---MENU SENHA---')
-
-    encontrado = False
-    while not encontrado:
+def pedir_usuario_confirmar(usuarios):
+   
+    while True:
         confi_usuario = input('Confirme seu usuário: ')
         for usuario in usuarios:
             if usuario['usuario'] == confi_usuario:
-                encontrado = True
-                usuario_atual = usuario
-                break
-        if not encontrado:
-            print('Usuário não encontrado!!')
-
-    while contador > 0:
-        contador -= 1
-        senha_atual = input('Digite a senha atual: ')
-        rep_senha_atual = input('Digite a senha novamente: ')
-        if senha_atual != rep_senha_atual:
-            print(f'As senhas não são iguais, restam {contador} tentativas')
-            senha_atual = input('Digite a senha atual: ')
-            rep_senha_atual = input('Digite a senha novamente: ')
+                return usuario
+        print('Usuário não encontrado!!')
+            
+def verificar_senha(usuario, tentativa=5):
+    while tentativa > 0:
+        senha_atual = input("Digite sua senha atual: ")
+        rep_senha = input("Repita a senha: ")
+        if senha_atual != rep_senha:
+            tentativa -= 1
+            print("As senhas não são iguais, tente novamente")
+            continue
+        if usuario ['senha'] == senha_atual:
+            return True
         else:
+            tentativa -= 1
+            print(f"Senha incorreta! Restam {tentativa} tentativas")
+    return False 
 
-            while True:
-                nova_senha = input('Digite a nova senha: ')
-                rep_senha_nova = input('Digite a nova senha novamente: ')
+def pausar():
+    input("Pressione ENTER para continuar")
 
-                if nova_senha != rep_senha_nova:
-                    print('As senhas não são iguais! tente novamente!')
-                    continue
+def pedir_nova_senha():
+    while True:
+        nova_senha = input('Digite a nova senha: ')
+        rep_senha_nova = input('Digite a nova senha novamente: ')
 
-                if usuario_atual['senha'] != senha_atual:
-                    print('Senha atual incorreta! tente novamente')
-                    break
+        if nova_senha != rep_senha_nova:
+            print('As senhas não são iguais! tente novamente!')
+            continue
+        return nova_senha
+    
+def mudar_senha(usuarios):
+    
+    print('\n---MENU SENHA---')
 
-                usuario_atual['senha'] = nova_senha
+    usuario_atual = pedir_usuario_confirmar(usuarios)
 
-                with open(arquivo_dados, 'w', encoding='utf-8') as arq:
-                    json.dump(usuarios, arq, indent=4, ensure_ascii=False)
+    if not verificar_senha(usuario_atual):
+        print("Não foi possível alterar a senha, retornando para o menu")
+        return
+    nova_senha = pedir_nova_senha()
+    usuario_atual['senha'] = nova_senha
+    salvar_dados(usuarios)
+    print("Senha alterada com sucesso!!")
+    pausar()
 
-                print('Senha atual alterada!')
-                
 def menu_pos_login():
     while True:
         print('-=-'*20)
@@ -133,7 +149,7 @@ def menu_pos_login():
 
             with open('LogEntrada.txt', 'a', encoding='utf-8') as regLL:
                 regLL.write(f'LogOut - {dataLog} - {horaLog}\n')
-            menu()
+ 
                  
 def login_dados():
     usuarios = carregar_dados()
@@ -158,28 +174,31 @@ def login_dados():
         menu_pos_login()
     else:
         print('Informações incorretas')
-       
+
+def verificar_senha_simples(usuario):
+    senha_digitada = input("Digite sua senha atual: ")
+    if usuario['senha'] == senha_digitada:
+        return True
+    else:
+        print("Senha incorreta")
+        return False
+
 def deletar_conta():
-    indice_encontrado = None
     usuarios = carregar_dados()
 
-    usuario_excluir = input('Digite o usuário: ')
-    senha_excluir = input('Digite a senha: ')
+    print("---DELETAR CONTA---\n")
+          
+    usuario_atual = pedir_usuario_confirmar(usuarios)
 
-    for i, usuario in enumerate(usuarios):
+    if not verificar_senha_simples(usuario_atual):
+        print("Não foi possível deletar a conta, retornando ao ao menu.")
+        pausar()
+        return
 
-        if usuario["usuario"] == usuario_excluir:
-            if usuario["senha"] == senha_excluir:
-                indice_encontrado = i
-                break
-    if indice_encontrado == None:
-        print('Usuário não encontrado!!')
-    else:
-        del usuarios[indice_encontrado]
-        print('Usuário deleteado!!')
-    with open(arquivo_dados, 'w', encoding='utf-8') as arq:
-        json.dump(usuarios, arq, indent=4, ensure_ascii=False)
-        exit()
+    usuarios.remove(usuario_atual)
+    salvar_dados(usuarios)
+    print(f"usuário {usuario_atual['usuario']} deletado com sucesso!")
+    pausar()
 
 def menu():
     while True:
